@@ -11,9 +11,7 @@ namespace BuditelWebServer.Server
         private readonly IPAddress ipAddress;
         private readonly int port;
         private readonly TcpListener serverListener;
-
-        // Това липсваше:
-        private readonly RoutingTable routingTable;
+        private readonly RoutingTables routingTable;
 
         public HttpServer(string ipAddress, int port, Action<IRoutingTable> routingTableConfiguration)
         {
@@ -21,11 +19,10 @@ namespace BuditelWebServer.Server
             this.port = port;
             this.serverListener = new TcpListener(this.ipAddress, this.port);
 
-            this.routingTable = new RoutingTable();
+            this.routingTable = new RoutingTables();
             routingTableConfiguration(this.routingTable);
         }
 
-        // Допълнителен конструктор за по-лесно ползване
         public HttpServer(int port, Action<IRoutingTable> routingTableConfiguration)
             : this("127.0.0.1", port, routingTableConfiguration)
         {
@@ -44,12 +41,10 @@ namespace BuditelWebServer.Server
                 var networkStream = connection.GetStream();
 
                 var requestText = this.ReadRequest(networkStream);
-
-                // Тук беше старата логика. Ето новата:
+                Console.WriteLine(requestText);
                 var request = Request.Parse(requestText);
                 var response = this.routingTable.MatchRequest(request);
 
-                // Изпълнение на Pre-Render Action (ако има)
                 if (response.PreRenderAction != null)
                 {
                     response.PreRenderAction(request, response);

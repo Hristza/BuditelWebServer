@@ -7,11 +7,12 @@ using System.Threading.Tasks;
 using BuditelWebServer.Server.Common;
 namespace BuditelWebServer.Server.HTTP
 {
-    public class HtmlResponse
+    public class HtmlResponse : ContentResponse
     {
         private string htmlForm;
 
         public HtmlResponse(string htmlForm)
+            :base(htmlForm,ContentType.Html)
         {
             this.htmlForm = htmlForm;
         }

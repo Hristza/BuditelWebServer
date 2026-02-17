@@ -1,6 +1,5 @@
 ﻿using BuditelWebServer.Server;
 using BuditelWebServer.Server.HTTP;
-using BuditelWebServer.Server.HTTP.BuditelWebServer.Server.HTTP;
 using static BuditelWebServer.Server.HTTP.RedirectedResponse;
 
 namespace BuditelWebServer.Demo
@@ -15,12 +14,11 @@ namespace BuditelWebServer.Demo
 
         static void Main(string[] args)
         {
-            // Тук вече подаваме Action<IRoutingTable>
             var server = new HttpServer(8080, routes => routes
                 .MapGet("/", new TextResponse("Hello from the server!"))
                 .MapGet("/Redirect", new RedirectResponse("https://softuni.org/"))
                 .MapGet("/HTML", new HtmlResponse(HtmlForm))
-                .MapPost("/HTML", new TextResponse("", AddFormDataAction))
+              .MapPost("/HTML", new TextResponse("", AddFormDataAction))
             );
 
             server.Start();

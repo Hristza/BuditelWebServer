@@ -8,15 +8,14 @@ namespace BuditelWebServer.Server.HTTP
         {
             IRoutingTable Map(string url, Method method, Response response);
             IRoutingTable MapGet(string url, Response response);
-            object MapGet(string v, HtmlResponse htmlResponse);
             IRoutingTable MapPost(string url, Response response);
         }
 
-        public class RoutingTable : IRoutingTable
+        public class RoutingTables : IRoutingTable
         {
             private readonly Dictionary<Method, Dictionary<string, Response>> routes;
 
-            public RoutingTable() =>
+            public RoutingTables() =>
                 this.routes = new Dictionary<Method, Dictionary<string, Response>>()
                 {
                     [Method.Get] = new Dictionary<string, Response>(),
@@ -24,37 +23,6 @@ namespace BuditelWebServer.Server.HTTP
                     [Method.Put] = new Dictionary<string, Response>(),
                     [Method.Delete] = new Dictionary<string, Response>(),
                 };
-
-            public IRoutingTable Map(string url, Method method, Response response)
-            {
-                throw new NotImplementedException();
-            }
-
-            public IRoutingTable MapGet(string url, Response response)
-            {
-                throw new NotImplementedException();
-            }
-
-            public object MapGet(string v, HtmlResponse htmlResponse)
-            {
-                throw new NotImplementedException();
-            }
-
-            public IRoutingTable MapPost(string url, Response response)
-            {
-                throw new NotImplementedException();
-            }
-
-            internal Response MatchRequest(Request request)
-            {
-                throw new NotImplementedException();
-            }
-        }
-        public class RoutingTables : IRoutingTable
-        {
-            private readonly Dictionary<Method, Dictionary<string, Response>> routes;
-
-           
 
             public IRoutingTable Map(
                 string url,
@@ -80,10 +48,7 @@ namespace BuditelWebServer.Server.HTTP
                 return this;
             }
 
-            public object MapGet(string v, HtmlResponse htmlResponse)
-            {
-                throw new NotImplementedException();
-            }
+           
 
             public IRoutingTable MapPost(
                 string url,
