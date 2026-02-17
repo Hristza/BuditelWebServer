@@ -1,14 +1,8 @@
-﻿using System;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BuditelWebServer.Server.HTTP
 {
-    using System.Collections;
-    using System.Collections.Generic;
-
     public class HeaderCollection : IEnumerable<Header>
     {
         private readonly Dictionary<string, Header> headers;
@@ -16,13 +10,18 @@ namespace BuditelWebServer.Server.HTTP
         public HeaderCollection()
             => this.headers = new Dictionary<string, Header>();
 
+        public string this[string name]
+            => this.headers[name].Value;
+
         public int Count => this.headers.Count;
+
+        public bool Contains(string name)
+            => this.headers.ContainsKey(name);
 
         public void Add(string name, string value)
         {
             var header = new Header(name, value);
-
-            this.headers.Add(name, header);
+            this.headers[name] = header; 
         }
 
         public IEnumerator<Header> GetEnumerator()

@@ -1,10 +1,4 @@
 ﻿using BuditelWebServer.Server.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WebServer.Server.HTTP_Request;
 
 namespace BuditelWebServer.Server.HTTP
 {
@@ -14,6 +8,7 @@ namespace BuditelWebServer.Server.HTTP
         {
             IRoutingTable Map(string url, Method method, Response response);
             IRoutingTable MapGet(string url, Response response);
+            object MapGet(string v, HtmlResponse htmlResponse);
             IRoutingTable MapPost(string url, Response response);
         }
 
@@ -40,7 +35,17 @@ namespace BuditelWebServer.Server.HTTP
                 throw new NotImplementedException();
             }
 
+            public object MapGet(string v, HtmlResponse htmlResponse)
+            {
+                throw new NotImplementedException();
+            }
+
             public IRoutingTable MapPost(string url, Response response)
+            {
+                throw new NotImplementedException();
+            }
+
+            internal Response MatchRequest(Request request)
             {
                 throw new NotImplementedException();
             }
@@ -73,6 +78,11 @@ namespace BuditelWebServer.Server.HTTP
                 this.routes[Method.Get][url] = response;
 
                 return this;
+            }
+
+            public object MapGet(string v, HtmlResponse htmlResponse)
+            {
+                throw new NotImplementedException();
             }
 
             public IRoutingTable MapPost(

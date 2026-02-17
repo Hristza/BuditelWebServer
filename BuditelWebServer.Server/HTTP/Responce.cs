@@ -1,25 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BuditelWebServer.Server.HTTP
+﻿namespace BuditelWebServer.Server.HTTP
 {
     public class Response
     {
-       public Response(StatusCode statusCode)
+        public Response(StatusCode statusCode)
         {
-            this.StatusCode = statusCode; 
+            this.StatusCode = statusCode;
 
-            this.Headers.Add(Header.Server, "My Web Server"); 
-            this.Headers.Add(Header.Date, $"{DateTime.UtcNow:r}"); 
+            this.Headers.Add(Header.Server, "My Web Server");
+            this.Headers.Add(Header.Date, $"{DateTime.UtcNow:r}");
         }
 
-        public HeaderCollection Headers { get; } = new HeaderCollection();
         public StatusCode StatusCode { get; init; }
 
+        public HeaderCollection Headers { get; } = new HeaderCollection();
+
         public string Body { get; set; }
-       
+
+        public Action<Request, Response> PreRenderAction { get; protected set; }
     }
 }

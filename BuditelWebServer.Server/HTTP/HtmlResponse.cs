@@ -9,6 +9,13 @@ namespace BuditelWebServer.Server.HTTP
 {
     public class HtmlResponse
     {
+        private string htmlForm;
+
+        public HtmlResponse(string htmlForm)
+        {
+            this.htmlForm = htmlForm;
+        }
+
         public class ContentResponse : Response
         {
             public ContentResponse(string content, string contentType)

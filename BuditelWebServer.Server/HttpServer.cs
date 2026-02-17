@@ -1,70 +1,89 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
-using System.Reflection.Metadata;
 using System.Text;
-using System.Threading.Tasks;
+using BuditelWebServer.Server.HTTP;
+using static BuditelWebServer.Server.HTTP.IRoutingTables;
 
 namespace BuditelWebServer.Server
 {
-	public class HttpServer
-	{
-		private readonly IPAddress ipAddress;
-		private readonly int port;
-		private readonly TcpListener serverListener;
+    public class HttpServer
+    {
+        private readonly IPAddress ipAddress;
+        private readonly int port;
+        private readonly TcpListener serverListener;
 
-		public HttpServer(string ipAddress, int port)
-		{
-			this.ipAddress = IPAddress.Parse(ipAddress);
-			this.port = port;
-			this.serverListener = new TcpListener(this.ipAddress,this.port);
-		}
+        // Това липсваше:
+        private readonly RoutingTable routingTable;
 
-		public void Start()
-		{
-			this.serverListener.Start();
+        public HttpServer(string ipAddress, int port, Action<IRoutingTable> routingTableConfiguration)
+        {
+            this.ipAddress = IPAddress.Parse(ipAddress);
+            this.port = port;
+            this.serverListener = new TcpListener(this.ipAddress, this.port);
 
-			Console.WriteLine($"Server started on port {port}");
-			Console.WriteLine($"Listening for requests...");
-			while (true)
-			{
-				var connection = serverListener.AcceptTcpClient();
-				var networkStream = connection.GetStream();
-				WriteResponse(networkStream, "Hello from the server!");
-				connection.Close();
-			}
-		}
+            this.routingTable = new RoutingTable();
+            routingTableConfiguration(this.routingTable);
+        }
 
-		private void WriteResponse(NetworkStream networkStream, string message)
-		{
-			int contentLength = Encoding.UTF8.GetByteCount(message);
-			var response = $@"HTTP/1.1
-Content-Type:text/plain; charset=UTF-8
-Content-Length: {contentLength}
+        // Допълнителен конструктор за по-лесно ползване
+        public HttpServer(int port, Action<IRoutingTable> routingTableConfiguration)
+            : this("127.0.0.1", port, routingTableConfiguration)
+        {
+        }
 
-{message}";
+        public void Start()
+        {
+            this.serverListener.Start();
 
-			var responseBytes = Encoding.UTF8.GetBytes(response);
-			networkStream.Write(responseBytes);
-		}
+            Console.WriteLine($"Server started on port {port}...");
+            Console.WriteLine("Listening for requests...");
 
-		private string ReadRequest(NetworkStream networkStream)
-		{
-			var buffetLenght = 1024;
-			var buffer = new byte[buffetLenght];
+            while (true)
+            {
+                var connection = serverListener.AcceptTcpClient();
+                var networkStream = connection.GetStream();
 
-			var requestBuilder = new StringBuilder();
+                var requestText = this.ReadRequest(networkStream);
 
-			do
-			{
-				var bytesRead = networkStream.Read(buffer, 0, buffetLenght);
-				requestBuilder.Append(Encoding.UTF8.GetString(buffer,0,bytesRead));
-			}
-			while (networkStream.DataAvailable);
+                // Тук беше старата логика. Ето новата:
+                var request = Request.Parse(requestText);
+                var response = this.routingTable.MatchRequest(request);
 
-			return requestBuilder.ToString();
-		}
-	}
+                // Изпълнение на Pre-Render Action (ако има)
+                if (response.PreRenderAction != null)
+                {
+                    response.PreRenderAction(request, response);
+                }
+
+                this.WriteResponse(networkStream, response);
+
+                connection.Close();
+            }
+        }
+
+        private string ReadRequest(NetworkStream networkStream)
+        {
+            var bufferLength = 1024;
+            var buffer = new byte[bufferLength];
+            var requestBuilder = new StringBuilder();
+            int totalBytes = 0;
+
+            do
+            {
+                var bytesRead = networkStream.Read(buffer, 0, bufferLength);
+                totalBytes += bytesRead;
+                if (totalBytes > 10 * 1024) throw new InvalidOperationException("Request too large");
+                requestBuilder.Append(Encoding.UTF8.GetString(buffer, 0, bytesRead));
+            }
+            while (networkStream.DataAvailable);
+
+            return requestBuilder.ToString();
+        }
+
+        private void WriteResponse(NetworkStream networkStream, Response response)
+        {
+            var responseBytes = Encoding.UTF8.GetBytes(response.ToString());
+            networkStream.Write(responseBytes);
+        }
+    }
 }
